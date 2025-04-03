@@ -29,7 +29,7 @@ async def handle_message(update: Update, context: CallbackContext) -> None:
 
     if user_data is None:
         context.user_data['temp_name'] = text
-
+        
         await update.message.reply_text(
             f"آیا مطمئن هستید که می‌خواهید نام شما به عنوان «{text}» ثبت شود؟",
             reply_markup=InlineKeyboardMarkup([
@@ -112,7 +112,7 @@ async def button(update: Update, context: CallbackContext) -> None:
         cursor.execute("INSERT INTO users (user_id, name, location, status) VALUES (?, ?, ?, ?)", 
                       (user_id, confirmed_name, "", "waiting_for_location"))
         conn.commit()
-
+        
         await query.edit_message_text(f"✅ نام شما با موفقیت ثبت شد: {confirmed_name}")
         await query.message.reply_text(
             "آیا در دفتر آبادان هستید؟",
@@ -120,17 +120,17 @@ async def button(update: Update, context: CallbackContext) -> None:
                 [InlineKeyboardButton("بله", callback_data='bale')],
                 [InlineKeyboardButton("نه", callback_data='na')]
             ]))
-
+    
     elif choice == 'cancel_name':
         await query.edit_message_text("❌ ثبت نام لغو شد. لطفاً دوباره اسم خود را ارسال کنید.")
-
+    
     elif choice == 'bale':
         cursor.execute("UPDATE users SET location = ?, status = ? WHERE user_id = ?", 
                       ("آبادان", "waiting_for_payment", user_id))
         conn.commit()
         await query.answer("📍 موقعیت شما به آبادان تغییر یافت.")
         await query.message.reply_text("👋 حالا می‌تونید مبلغ واریزی رو ارسال کنید.")
-
+    
     elif choice == 'na':
         cursor.execute("UPDATE users SET location = ?, status = ? WHERE user_id = ?", 
                       ("", "waiting_for_payment", user_id))
@@ -223,7 +223,7 @@ async def start(update: Update, context: CallbackContext) -> None:
 
 # 📌 اجرای ربات
 def main():
-    TOKEN = "8111223663:AAHY2zKKXZv_4ud9ioZ3je5PPhfFTnH9OPk"
+    TOKEN = "7641478550:AAHvsWrNhZJTdb4SPkO7UyJiQZ778wvpyFU"
     application = Application.builder().token(TOKEN).build()
 
     application.add_handler(CommandHandler("start", start))
