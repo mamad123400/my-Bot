@@ -223,7 +223,7 @@ async def start(update: Update, context: CallbackContext) -> None:
 
 # 📌 اجرای ربات
 def main():
-    TOKEN = "7641478550:AAHvsWrNhZJTdb4SPkO7UyJiQZ778wvpyFU"
+    TOKEN = "8111223663:AAHY2zKKXZv_4ud9ioZ3je5PPhfFTnH9OPk"
     application = Application.builder().token(TOKEN).build()
 
     application.add_handler(CommandHandler("start", start))
