@@ -29,7 +29,7 @@ async def handle_message(update: Update, context: CallbackContext) -> None:
 
     if user_data is None:
         context.user_data['temp_name'] = text
-        
+
         await update.message.reply_text(
             f"آیا مطمئن هستید که می‌خواهید نام شما به عنوان «{text}» ثبت شود؟",
             reply_markup=InlineKeyboardMarkup([
@@ -44,48 +44,43 @@ async def handle_message(update: Update, context: CallbackContext) -> None:
             await update.message.reply_text(f"👋 خوش اومدی {name}!\nمبلغ واریزی رو بفرس تا ذخیره کنم.")
 # 📌 ثبت و نمایش واریزی
 async def add_payment(update: Update, context: CallbackContext, user_name: str, location: str) -> None:
-    user_id = update.message.from_user.id
-    text = update.message.text.strip()
+  user_id = update.message.from_user.id
+  text = update.message.text.strip()
 
-    try:
-        amount = float(text)
-        cursor.execute("INSERT INTO payments (user_id, amount) VALUES (?, ?)", (user_id, amount))
-        conn.commit()
+  try:
+      amount = float(text) * 1000  # 👈 ضرب مقدار ورودی در ۱۰۰۰
+      cursor.execute("INSERT INTO payments (user_id, amount) VALUES (?, ?)", (user_id, amount))
+      conn.commit()
 
-        cursor.execute("SELECT SUM(amount) FROM payments WHERE user_id=?", (user_id,))
-        total_amount = cursor.fetchone()[0] or 0.0  # اطمینان از اینکه عدد واقعی است
+      cursor.execute("SELECT SUM(amount) FROM payments WHERE user_id=?", (user_id,))
+      total_amount = cursor.fetchone()[0] or 0.0  
 
-        cursor.execute("SELECT max_total FROM records WHERE user_id=?", (user_id,))
-        record_data = cursor.fetchone()
-        max_record = record_data[0] if record_data else 0.0  # اطمینان از اینکه عدد واقعی است
+      cursor.execute("SELECT max_total FROM records WHERE user_id=?", (user_id,))
+      record_data = cursor.fetchone()
+      max_record = record_data[0] if record_data else 0.0  
 
-        if total_amount > max_record:  # اگر مجموع واریزی جدید بیشتر از رکورد قبلی باشد
-            cursor.execute("INSERT OR REPLACE INTO records (user_id, max_total) VALUES (?, ?)", (user_id, total_amount))
-            conn.commit()
-            max_record = total_amount
+      if total_amount > max_record:
+          cursor.execute("INSERT OR REPLACE INTO records (user_id, max_total) VALUES (?, ?)", (user_id, total_amount))
+          conn.commit()
+          max_record = total_amount
 
-        # 📌 گرفتن موقعیت کاربر از دیتابیس (اگر مقدار `location` در ورودی `None` باشد)
-        if not location:
-            cursor.execute("SELECT location FROM users WHERE user_id=?", (user_id,))
-            location_data = cursor.fetchone()
-            location = location_data[0] if location_data else ""
+      if not location:
+          cursor.execute("SELECT location FROM users WHERE user_id=?", (user_id,))
+          location_data = cursor.fetchone()
+          location = location_data[0] if location_data else ""
 
-        # 📌 گرفتن تاریخ شمسی
-        shamsi_date = jdatetime.date.today()
-        date_shamsi = shamsi_date.strftime("%d %m")
+      shamsi_date = jdatetime.date.today()
+      date_shamsi = shamsi_date.strftime("%d %m")
+      day, month = date_shamsi.split()
+      month_farsi = persian_months[int(month)-1]
+      date_farsi = f"{day} {month_farsi}"
 
-        # تبدیل ماه به فارسی
-        day, month = date_shamsi.split()
-        month_farsi = persian_months[int(month)-1]
-        date_farsi = f"{day} {month_farsi}"
+      message = f"""💎 {user_name} 💎"""
 
-        message = f"""💎 {user_name} 💎"""
+      if location == "آبادان":
+          message += f"\n📍 آبادان"
 
-        # 📌 نمایش موقعیت فقط اگر در آبادان باشد
-        if location == "آبادان":
-            message += f"\n📍 آبادان"
-
-        message += f"""
+      message += f"""
 
 واریزی: {amount:,.0f} تومن
 
@@ -95,11 +90,9 @@ async def add_payment(update: Update, context: CallbackContext, user_name: str, 
 
 {date_farsi}
 """
-
-        await update.message.reply_text(message)
-    except ValueError:
-        await update.message.reply_text("❌ لطفاً فقط مبلغ را به عدد ارسال کنید.")
-
+      await update.message.reply_text(message)
+  except ValueError:
+      await update.message.reply_text("❌ لطفاً فقط مبلغ را به عدد ارسال کنید.")
 
 # 📌 دریافت موقعیت کاربر (با دکمه‌ها)
 async def button(update: Update, context: CallbackContext) -> None:
@@ -112,7 +105,7 @@ async def button(update: Update, context: CallbackContext) -> None:
         cursor.execute("INSERT INTO users (user_id, name, location, status) VALUES (?, ?, ?, ?)", 
                       (user_id, confirmed_name, "", "waiting_for_location"))
         conn.commit()
-        
+
         await query.edit_message_text(f"✅ نام شما با موفقیت ثبت شد: {confirmed_name}")
         await query.message.reply_text(
             "آیا در دفتر آبادان هستید؟",
@@ -120,17 +113,17 @@ async def button(update: Update, context: CallbackContext) -> None:
                 [InlineKeyboardButton("بله", callback_data='bale')],
                 [InlineKeyboardButton("نه", callback_data='na')]
             ]))
-    
+
     elif choice == 'cancel_name':
         await query.edit_message_text("❌ ثبت نام لغو شد. لطفاً دوباره اسم خود را ارسال کنید.")
-    
+
     elif choice == 'bale':
         cursor.execute("UPDATE users SET location = ?, status = ? WHERE user_id = ?", 
                       ("آبادان", "waiting_for_payment", user_id))
         conn.commit()
         await query.answer("📍 موقعیت شما به آبادان تغییر یافت.")
         await query.message.reply_text("👋 حالا می‌تونید مبلغ واریزی رو ارسال کنید.")
-    
+
     elif choice == 'na':
         cursor.execute("UPDATE users SET location = ?, status = ? WHERE user_id = ?", 
                       ("", "waiting_for_payment", user_id))
