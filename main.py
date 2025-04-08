@@ -179,7 +179,7 @@ async def get_total(update: Update, context: CallbackContext) -> None:
 
     message += f"""
 
-جمع واریزی تا این لحظه: {total_amount:,.0f} kمن🔥
+جمع واریزی تا این لحظه: {total_amount:,.0f} تومن🔥
 
 🏆 رکورد واریزی: (‼️{max_record:,.0f}‼️)
 
