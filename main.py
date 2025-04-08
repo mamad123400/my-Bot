@@ -75,7 +75,7 @@ async def add_payment(update: Update, context: CallbackContext, user_name: str, 
       month_farsi = persian_months[int(month)-1]
       date_farsi = f"{day} {month_farsi}"
 
-      message = f"""👑 {user_name}
+      message = f"""💎 {user_name} 💎"""
 
       if location == "آبادان":
           message += f"\n📍 آبادان"
@@ -172,7 +172,7 @@ async def get_total(update: Update, context: CallbackContext) -> None:
     month_farsi = persian_months[int(month)-1]
     date_farsi = f"{day} {month_farsi}"
 
-    message = f"""👑 {user_name}
+    message = f"""💎 {user_name} 💎"""
 
     if location == "آبادان":
         message += f"\n📍 آبادان"
@@ -216,7 +216,7 @@ async def start(update: Update, context: CallbackContext) -> None:
 
 # 📌 اجرای ربات
 def main():
-    TOKEN = "8111223663:AAHinvsiDK-pNSXn_eeMheake3QDt8EJjDE"
+    TOKEN = "7641478550:AAHvsWmTdiQZ778wvpyFU"
     application = Application.builder().token(TOKEN).build()
 
     application.add_handler(CommandHandler("start", start))
