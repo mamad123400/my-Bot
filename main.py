@@ -75,7 +75,7 @@ async def add_payment(update: Update, context: CallbackContext, user_name: str, 
       month_farsi = persian_months[int(month)-1]
       date_farsi = f"{day} {month_farsi}"
 
-      message = f"""💎 {user_name} 💎"""
+      message = f""" {user_name} 💎"""
 
       if location == "آبادان":
           message += f"\n📍 آبادان"
@@ -172,7 +172,7 @@ async def get_total(update: Update, context: CallbackContext) -> None:
     month_farsi = persian_months[int(month)-1]
     date_farsi = f"{day} {month_farsi}"
 
-    message = f"""💎 {user_name} 💎"""
+    message = f""" {user_name} 💎"""
 
     if location == "آبادان":
         message += f"\n📍 آبادان"
